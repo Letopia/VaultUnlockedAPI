@@ -8,6 +8,7 @@ CLAUDE.md
 /.idea/
 /VaultAPI.iml
 /VaultUnlockedAPI.iml
+/local.properties
 
 ## From gitignore/Gradle.gitignore on GitHub
 .gradle

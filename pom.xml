@@ -38,6 +38,16 @@
 		</developer>
 	</developers>
 
+	<contributors>
+		<contributor>
+			<name>"CreepyX</name>
+			<organization>TCA-Studios</organization>
+			<roles>
+				<role>contributer</role>
+			</roles>
+		</contributor>
+	</contributors>
+
 	<scm>
 		<url>https://github.com/TheNewEconomy/VaultUnlockedAPI</url>
 		<connection>scm:git:git://github.com/TheNewEconomy/VaultUnlockedAPI.git</connection>

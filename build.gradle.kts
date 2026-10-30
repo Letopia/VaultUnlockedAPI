@@ -1,11 +1,17 @@
+import java.util.Properties
+
 plugins {
     `java-library`
     `maven-publish`
 }
 
 group = "net.milkbowl.vault"
-version = "2.20"
+version = "2.20+tca"
 description = "VaultUnlockedAPI"
+
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use { load(it) }
+}
 
 repositories {
     mavenCentral()
@@ -72,25 +78,34 @@ publishing {
                     organizationUrl = "https://tnemc.net"
                 }
             }
-            scm {
-                connection = "scm:git:git://github.com/TheNewEconomy/VaultUnlockedAPI.git"
-                developerConnection = "scm:git:git://github.com/TheNewEconomy/VaultUnlockedAPI.git"
-                url = "https://github.com/TheNewEconomy/VaultUnlockedAPI"
-            }
-            issueManagement {
-                system = "GitHub"
-                url = "https://github.com/TheNewEconomy/VaultUnlockedAPI/issues"
+            contributors {
+                contributor {
+                    name = "CreepyX"
+                    organization = "TCA-Studios"
+                }
             }
         }
     }
 
     repositories {
+//        maven {
+//            name = "CodeMC"
+//            url = uri("https://repo.codemc.io/repository/creatorfromhell/")
+//
+//            val mavenUsername = System.getenv("GRADLE_PROJECT_MAVEN_USERNAME")
+//            val mavenPassword = System.getenv("GRADLE_PROJECT_MAVEN_PASSWORD")
+//            if (mavenUsername != null && mavenPassword != null) {
+//                credentials {
+//                    username = mavenUsername
+//                    password = mavenPassword
+//                }
+//            }
+//        }
         maven {
-            name = "CodeMC"
-            url = uri("https://repo.codemc.io/repository/creatorfromhell/")
-
-            val mavenUsername = System.getenv("GRADLE_PROJECT_MAVEN_USERNAME")
-            val mavenPassword = System.getenv("GRADLE_PROJECT_MAVEN_PASSWORD")
+            name = "TCARepo"
+            url = uri("https://repo.creepyx.com/releases/")
+            val mavenUsername = localProperties.getProperty("mvn.user")
+            val mavenPassword = localProperties.getProperty("mvn.token")
             if (mavenUsername != null && mavenPassword != null) {
                 credentials {
                     username = mavenUsername

@@ -40,6 +40,184 @@ public final class EconomyFutures {
   }
 
   /*
+   * Bank Methods
+   */
+
+  /**
+   * Retrieves a user's bank balance in the default world and currency.
+   */
+  @NotNull
+  public static CompletableFuture<BigDecimal> bankBalance(@NotNull final Economy economy,
+                                                          @NotNull final UUID userID) {
+
+    return economy.async()
+            .map(async -> async.bankBalance(userID))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.bankBalance(userID)));
+  }
+
+  /**
+   * Retrieves a user's bank balance in the specified world and default currency.
+   */
+  @NotNull
+  public static CompletableFuture<BigDecimal> bankBalance(@NotNull final Economy economy,
+                                                          @NotNull final UUID userID,
+                                                          @NotNull final String worldName) {
+
+    return economy.async()
+            .map(async -> async.bankBalance(userID, worldName))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.bankBalance(userID, worldName)));
+  }
+
+  /**
+   * Checks whether a user has a bank account.
+   */
+  @NotNull
+  public static CompletableFuture<Boolean> hasBank(@NotNull final Economy economy,
+                                                   @NotNull final UUID userID) {
+
+    return economy.async()
+            .map(async -> async.hasBank(userID))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.hasBank(userID)));
+  }
+
+  /**
+   * Withdraws an amount from a user's bank account in the default world.
+   */
+  @NotNull
+  public static CompletableFuture<EconomyResponse> withdrawBank(@NotNull final Economy economy,
+                                                                @NotNull final UUID userID,
+                                                                @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.withdrawBank(userID, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.withdrawBank(userID, amount)));
+  }
+
+  /**
+   * Withdraws an amount from a user's bank account in the specified world.
+   */
+  @NotNull
+  public static CompletableFuture<EconomyResponse> withdrawBank(@NotNull final Economy economy,
+                                                                @NotNull final UUID userID,
+                                                                @NotNull final String worldName,
+                                                                @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.withdrawBank(userID, worldName, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.withdrawBank(userID, worldName, amount)));
+  }
+
+  /**
+   * Deposits an amount into a user's bank account in the default world.
+   */
+  @NotNull
+  public static CompletableFuture<EconomyResponse> depositBank(@NotNull final Economy economy,
+                                                               @NotNull final UUID userID,
+                                                               @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.depositBank(userID, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.depositBank(userID, amount)));
+  }
+
+  /**
+   * Deposits an amount into a user's bank account in the specified world.
+   */
+  @NotNull
+  public static CompletableFuture<EconomyResponse> depositBank(@NotNull final Economy economy,
+                                                               @NotNull final UUID userID,
+                                                               @NotNull final String worldName,
+                                                               @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.depositBank(userID, worldName, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.depositBank(userID, worldName, amount)));
+  }
+
+  /**
+   * Checks whether an amount can be withdrawn from a user's bank account in the default world.
+   */
+  @NotNull
+  public static CompletableFuture<EconomyResponse> canWithdrawBank(@NotNull final Economy economy,
+                                                                   @NotNull final UUID userID,
+                                                                   @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.canWithdrawBank(userID, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.canWithdrawBank(userID, amount)));
+  }
+
+  /**
+   * Checks whether an amount can be withdrawn from a user's bank account in the specified world.
+   */
+  @NotNull
+  public static CompletableFuture<EconomyResponse> canWithdrawBank(@NotNull final Economy economy,
+                                                                   @NotNull final UUID userID,
+                                                                   @NotNull final String worldName,
+                                                                   @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.canWithdrawBank(userID, worldName, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.canWithdrawBank(userID, worldName, amount)));
+  }
+
+  /**
+   * Checks whether an amount can be deposited into a user's bank account in the default world.
+   */
+  @NotNull
+  public static CompletableFuture<EconomyResponse> canDepositBank(@NotNull final Economy economy,
+                                                                  @NotNull final UUID userID,
+                                                                  @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.canDepositBank(userID, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.canDepositBank(userID, amount)));
+  }
+
+  /**
+   * Checks whether an amount can be deposited into a user's bank account in the specified world.
+   */
+  @NotNull
+  public static CompletableFuture<EconomyResponse> canDepositBank(@NotNull final Economy economy,
+                                                                  @NotNull final UUID userID,
+                                                                  @NotNull final String worldName,
+                                                                  @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.canDepositBank(userID, worldName, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.canDepositBank(userID, worldName, amount)));
+  }
+
+  /**
+   * Transfers bank funds in the default world and currency.
+   */
+  @NotNull
+  public static CompletableFuture<MultiEconomyResponse> transferBank(@NotNull final Economy economy,
+                                                                     @NotNull final UUID fromUserID,
+                                                                     @NotNull final UUID toUserID,
+                                                                     @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.transferBank(fromUserID, toUserID, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.transferBank(fromUserID, toUserID, amount)));
+  }
+
+  /**
+   * Transfers bank funds in the specified world and default currency.
+   */
+  @NotNull
+  public static CompletableFuture<MultiEconomyResponse> transferBank(@NotNull final Economy economy,
+                                                                     @NotNull final UUID fromUserID,
+                                                                     @NotNull final UUID toUserID,
+                                                                     @NotNull final String worldName,
+                                                                     @NotNull final BigDecimal amount) {
+
+    return economy.async()
+            .map(async -> async.transferBank(fromUserID, toUserID, worldName, amount))
+            .orElseGet(() -> CompletableFuture.completedFuture(economy.transferBank(fromUserID, toUserID, worldName, amount)));
+  }
+
+  /*
    * Account Methods
    */
 

@@ -255,6 +255,105 @@ public interface AsyncEconomy {
                                  @NotNull BigDecimal amount);
 
   /*
+   * Bank Methods
+   */
+
+  /**
+   * Asynchronously retrieves a user's bank balance in the default world and currency.
+   */
+  @NotNull
+  CompletableFuture<BigDecimal> bankBalance(@NotNull UUID userID);
+
+  /**
+   * Asynchronously retrieves a user's bank balance in the specified world and default currency.
+   */
+  @NotNull
+  CompletableFuture<BigDecimal> bankBalance(@NotNull UUID userID, @NotNull String worldName);
+
+  /**
+   * Asynchronously checks whether a user has a bank account.
+   */
+  @NotNull
+  CompletableFuture<Boolean> hasBank(@NotNull UUID userID);
+
+  /**
+   * Asynchronously withdraws an amount from a user's bank account in the default world.
+   */
+  @NotNull
+  CompletableFuture<EconomyResponse> withdrawBank(@NotNull UUID userID, @NotNull BigDecimal amount);
+
+  /**
+   * Asynchronously withdraws an amount from a user's bank account in the specified world.
+   */
+  @NotNull
+  CompletableFuture<EconomyResponse> withdrawBank(@NotNull UUID userID,
+                                                  @NotNull String worldName,
+                                                  @NotNull BigDecimal amount);
+
+  /**
+   * Asynchronously deposits an amount into a user's bank account in the default world.
+   */
+  @NotNull
+  CompletableFuture<EconomyResponse> depositBank(@NotNull UUID userID, @NotNull BigDecimal amount);
+
+  /**
+   * Asynchronously deposits an amount into a user's bank account in the specified world.
+   */
+  @NotNull
+  CompletableFuture<EconomyResponse> depositBank(@NotNull UUID userID,
+                                                 @NotNull String worldName,
+                                                 @NotNull BigDecimal amount);
+
+  /**
+   * Asynchronously checks whether an amount can be withdrawn from a user's bank account in the
+   * default world.
+   */
+  @NotNull
+  CompletableFuture<EconomyResponse> canWithdrawBank(@NotNull UUID userID, @NotNull BigDecimal amount);
+
+  /**
+   * Asynchronously checks whether an amount can be withdrawn from a user's bank account in the
+   * specified world.
+   */
+  @NotNull
+  CompletableFuture<EconomyResponse> canWithdrawBank(@NotNull UUID userID,
+                                                     @NotNull String worldName,
+                                                     @NotNull BigDecimal amount);
+
+  /**
+   * Asynchronously checks whether an amount can be deposited into a user's bank account in the
+   * default world.
+   */
+  @NotNull
+  CompletableFuture<EconomyResponse> canDepositBank(@NotNull UUID userID, @NotNull BigDecimal amount);
+
+  /**
+   * Asynchronously checks whether an amount can be deposited into a user's bank account in the
+   * specified world.
+   */
+  @NotNull
+  CompletableFuture<EconomyResponse> canDepositBank(@NotNull UUID userID,
+                                                    @NotNull String worldName,
+                                                    @NotNull BigDecimal amount);
+
+  /**
+   * Asynchronously transfers bank funds in the default world and currency.
+   */
+  @NotNull
+  CompletableFuture<MultiEconomyResponse> transferBank(@NotNull UUID fromUserID,
+                                                       @NotNull UUID toUserID,
+                                                       @NotNull BigDecimal amount);
+
+  /**
+   * Asynchronously transfers bank funds in the specified world and default currency.
+   */
+  @NotNull
+  CompletableFuture<MultiEconomyResponse> transferBank(@NotNull UUID fromUserID,
+                                                       @NotNull UUID toUserID,
+                                                       @NotNull String worldName,
+                                                       @NotNull BigDecimal amount);
+
+  /*
    * Transactions
    */
 

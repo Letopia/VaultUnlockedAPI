@@ -68,6 +68,16 @@ public interface Economy {
   boolean hasMultiCurrencySupport();
 
   /**
+   * Returns true if the economy plugin supports bank accounts.
+   *
+   * @return true if the economy plugin supports bank accounts.
+   */
+  default boolean hasBankSupport() {
+
+    return false;
+  }
+
+  /**
    * Indicates whether asynchronous operations are supported.
    *
    * @return true if asynchronous operations are supported; false otherwise.
@@ -258,8 +268,207 @@ public interface Economy {
   Collection<String> currencies();
 
   /*
+   * Bank-related methods follow. Bank balances and transactions always use the provider's default
+   * currency; currency-specific overloads are intentionally not provided.
+   */
+
+  /**
+   * Returns the bank balance for a user. Callers should first check {@link #hasBankSupport()}.
+   */
+  default BigDecimal bankBalance(@NotNull final UUID userID) {
+
+    throw new UnsupportedOperationException("Bank support is not implemented by this economy provider.");
+  }
+
+  /**
+   * Returns the bank balance for a user in the specified world. Providers without world support
+   * use their default world.
+   */
+  default BigDecimal bankBalance(@NotNull final UUID userID, @NotNull final String worldName) {
+
+    return bankBalance(userID);
+  }
+
+  /**
+   * Checks whether a user has a bank account. Providers without bank support return false.
+   */
+  default boolean hasBank(@NotNull final UUID userID) {
+
+    return false;
+  }
+
+  /**
+   * Withdraws an amount from a user's bank account. Providers without bank support return
+   * {@link ResponseType#NOT_IMPLEMENTED}.
+   */
+  default EconomyResponse withdrawBank(@NotNull final UUID userID, @NotNull final BigDecimal amount) {
+
+    return bankOperationNotImplemented("withdrawBank");
+  }
+
+  /**
+   * Withdraws an amount from a user's bank account in the specified world. Providers without
+   * world support use their default world.
+   */
+  default EconomyResponse withdrawBank(@NotNull final UUID userID, @NotNull final String worldName, @NotNull final BigDecimal amount) {
+
+    return withdrawBank(userID, amount);
+  }
+
+  /**
+   * Deposits an amount into a user's bank account. Providers without bank support return
+   * {@link ResponseType#NOT_IMPLEMENTED}.
+   */
+  default EconomyResponse depositBank(@NotNull final UUID userID, @NotNull final BigDecimal amount) {
+
+    return bankOperationNotImplemented("depositBank");
+  }
+
+  /**
+   * Deposits an amount into a user's bank account in the specified world. Providers without
+   * world support use their default world.
+   */
+  default EconomyResponse depositBank(@NotNull final UUID userID, @NotNull final String worldName, @NotNull final BigDecimal amount) {
+
+    return depositBank(userID, amount);
+  }
+
+  /**
+   * Checks whether an amount can be withdrawn from a user's bank account.
+   */
+  default EconomyResponse canWithdrawBank(@NotNull final UUID userID, @NotNull final BigDecimal amount) {
+
+    return bankOperationNotImplemented("canWithdrawBank");
+  }
+
+  /**
+   * Checks whether an amount can be withdrawn from a user's bank account in the specified world.
+   */
+  default EconomyResponse canWithdrawBank(@NotNull final UUID userID, @NotNull final String worldName, @NotNull final BigDecimal amount) {
+
+    return canWithdrawBank(userID, amount);
+  }
+
+  /**
+   * Checks whether an amount can be deposited into a user's bank account.
+   */
+  default EconomyResponse canDepositBank(@NotNull final UUID userID, @NotNull final BigDecimal amount) {
+
+    return bankOperationNotImplemented("canDepositBank");
+  }
+
+  /**
+   * Checks whether an amount can be deposited into a user's bank account in the specified world.
+   */
+  default EconomyResponse canDepositBank(@NotNull final UUID userID, @NotNull final String worldName, @NotNull final BigDecimal amount) {
+
+    return canDepositBank(userID, amount);
+  }
+
+  /**
+   * Transfers funds between two users' bank accounts. A failed deposit is rolled back; a failed
+   * rollback is reported in the response error message.
+   */
+  default MultiEconomyResponse transferBank(@NotNull final UUID fromUserID, @NotNull final UUID toUserID, @NotNull final BigDecimal amount) {
+
+    if (amount.signum() < 0) {
+      return new MultiEconomyResponse(amount, ResponseType.FAILURE, "Transfer amount must not be negative.");
+    }
+
+    if (fromUserID.equals(toUserID)) {
+      final MultiEconomyResponse response = new MultiEconomyResponse(BigDecimal.ZERO, ResponseType.SUCCESS, "");
+      response.addBalance(fromUserID, bankBalance(fromUserID));
+      return response;
+    }
+    if (amount.signum() == 0) {
+      final MultiEconomyResponse response = new MultiEconomyResponse(BigDecimal.ZERO, ResponseType.SUCCESS, "");
+      response.addBalance(fromUserID, bankBalance(fromUserID));
+      response.addBalance(toUserID, bankBalance(toUserID));
+      return response;
+    }
+
+    final EconomyResponse withdrawResponse = withdrawBank(fromUserID, amount);
+    if (!withdrawResponse.transactionSuccess()) {
+      return new MultiEconomyResponse(amount, withdrawResponse.type, withdrawResponse.errorMessage);
+    }
+
+    final BigDecimal withdrawnAmount = withdrawResponse.amount;
+    final EconomyResponse depositResponse = depositBank(toUserID, withdrawnAmount);
+    if (!depositResponse.transactionSuccess()) {
+      final EconomyResponse rollbackResponse = depositBank(fromUserID, withdrawnAmount);
+      final String errorMessage = rollbackResponse.transactionSuccess()
+              ? depositResponse.errorMessage
+              : depositResponse.errorMessage + " Bank withdrawal rollback also failed: " + rollbackResponse.errorMessage;
+      final MultiEconomyResponse failure = new MultiEconomyResponse(withdrawnAmount, depositResponse.type, errorMessage);
+      failure.addBalance(fromUserID, rollbackResponse.balance);
+      failure.addBalance(toUserID, depositResponse.balance);
+      return failure;
+    }
+
+    final MultiEconomyResponse success = new MultiEconomyResponse(withdrawnAmount, ResponseType.SUCCESS, "");
+    success.addBalance(fromUserID, withdrawResponse.balance);
+    success.addBalance(toUserID, depositResponse.balance);
+    return success;
+  }
+
+  /**
+   * Transfers bank funds within the specified world. Providers without world support use their
+   * default world.
+   */
+  default MultiEconomyResponse transferBank(@NotNull final UUID fromUserID, @NotNull final UUID toUserID, @NotNull final String worldName, @NotNull final BigDecimal amount) {
+
+    if (amount.signum() < 0) {
+      return new MultiEconomyResponse(amount, ResponseType.FAILURE, "Transfer amount must not be negative.");
+    }
+
+    if (fromUserID.equals(toUserID)) {
+      final MultiEconomyResponse response = new MultiEconomyResponse(BigDecimal.ZERO, ResponseType.SUCCESS, "");
+      response.addBalance(fromUserID, bankBalance(fromUserID, worldName));
+      return response;
+    }
+    if (amount.signum() == 0) {
+      final MultiEconomyResponse response = new MultiEconomyResponse(BigDecimal.ZERO, ResponseType.SUCCESS, "");
+      response.addBalance(fromUserID, bankBalance(fromUserID, worldName));
+      response.addBalance(toUserID, bankBalance(toUserID, worldName));
+      return response;
+    }
+
+    final EconomyResponse withdrawResponse = withdrawBank(fromUserID, worldName, amount);
+    if (!withdrawResponse.transactionSuccess()) {
+      return new MultiEconomyResponse(amount, withdrawResponse.type, withdrawResponse.errorMessage);
+    }
+
+    final BigDecimal withdrawnAmount = withdrawResponse.amount;
+    final EconomyResponse depositResponse = depositBank(toUserID, worldName, withdrawnAmount);
+    if (!depositResponse.transactionSuccess()) {
+      final EconomyResponse rollbackResponse = depositBank(fromUserID, worldName, withdrawnAmount);
+      final String errorMessage = rollbackResponse.transactionSuccess()
+              ? depositResponse.errorMessage
+              : depositResponse.errorMessage + " Bank withdrawal rollback also failed: " + rollbackResponse.errorMessage;
+      final MultiEconomyResponse failure = new MultiEconomyResponse(withdrawnAmount, depositResponse.type, errorMessage);
+      failure.addBalance(fromUserID, rollbackResponse.balance);
+      failure.addBalance(toUserID, depositResponse.balance);
+      return failure;
+    }
+
+    final MultiEconomyResponse success = new MultiEconomyResponse(withdrawnAmount, ResponseType.SUCCESS, "");
+    success.addBalance(fromUserID, withdrawResponse.balance);
+    success.addBalance(toUserID, depositResponse.balance);
+    return success;
+  }
+
+  /**
+   * Creates the standard response for optional bank operations that a provider does not implement.
+   */
+  static EconomyResponse bankOperationNotImplemented(final String operation) {
+
+    return new EconomyResponse(BigDecimal.ZERO, BigDecimal.ZERO, ResponseType.NOT_IMPLEMENTED, operation + " is not implemented by this economy provider.");
+  }
+
+  /*
    * Account-related methods follow.
    */
+
   /**
    * Attempts to create an account for the given UUID.
    *
